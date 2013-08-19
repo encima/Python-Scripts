@@ -5,7 +5,8 @@ from datetime import *
 
 def get_output_dir(output):
 	num_archives = len([name for name in os.listdir(output) if os.path.isdir(output + name)])
-	output_dir = output + 'dwc_arch' + str(num_archives+1) + '/'
+	output_dir = output + 'dwc_arch_' + str(num_archives+1) + '/'
+	eventID = num_archives+1
 	os.makedirs(output_dir)
 	return output_dir
 
@@ -25,15 +26,14 @@ def create_archive(directory, output_dir, img):
 	    recBy =  metadata['MakerNotes:SerialNumber']
 	setfile = open(output_dir + 'set.csv', 'ab')
 	setwriter = csv.writer(setfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-	setwriter.writerow([2, 'MovingImage', recBy, date, time, '', '', '', ''])
-	return 2
+	setwriter.writerow([eventID, 'MovingImage', recBy, date, time, '', '', '', ''])
+	return eventID
 
 def write_image_csv(id, paths, output_dir):
 	image_csv = open(output_dir + 'images.csv', 'ab')
 	imgwriter = csv.writer(image_csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-	imgwriter.writerow(['eventID', 'identifier'])
 	for path in paths:
-		imgwriter.writerow([2, path])
+		imgwriter.writerow([eventID, path])
 	image_csv.close()
 
 def setup_csv(output_dir, filename, headers):
@@ -55,16 +55,21 @@ output = parser.get('DEFAULT', 'OUTPUT_DIR')
 step = int(parser.get('DEFAULT', 'STEP'))
 
 images = get_images(directory)
+images = sorted(images, key = lambda x: x[:-4])
 
 for i in range(0, len(images), step):
+	eventID = len([name for name in os.listdir(output) if os.path.isdir(output + name)]) + 1
 	output_dir = get_output_dir(output)
+	print eventID
 	write_xml(output_dir, 'meta', parser)
 	write_xml(output_dir, 'eml', parser)
 	setup_csv(output_dir, 'images.csv', ['eventID', 'identifier'])
 	setup_csv(output_dir, 'set.csv', ['eventID', 'basisOfRecord', 'recordedBy', 'eventDate', 'eventTime', 'locationID', 'scientificName', 'identifiedBy', 'dateIdentified'])
-	eventID = create_archive(directory, output_dir, images[i])
+	create_archive(directory, output_dir, images[i])
 	img_to_write = []
 	for j in range(i, i+step):
+		print images[j]
 		img_to_write.append(images[j])
+	print '------'
 	write_image_csv(eventID, img_to_write, output_dir)
 
