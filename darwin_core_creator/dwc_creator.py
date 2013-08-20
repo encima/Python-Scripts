@@ -6,7 +6,6 @@ from datetime import *
 def get_output_dir(output):
 	num_archives = len([name for name in os.listdir(output) if os.path.isdir(output + name)])
 	output_dir = output + 'dwc_arch_' + str(num_archives+1) + '/'
-	eventID = num_archives+1
 	os.makedirs(output_dir)
 	return output_dir
 
@@ -47,29 +46,29 @@ def write_xml(output_dir, key, parser):
 	xml_file.write(parser.get('DEFAULT', key))
 	xml_file.close
 
+def __main__():
+	parser = SafeConfigParser()
+	parser.read('config.ini')
+	directory  = parser.get('DEFAULT', 'IMG_DIR')
+	output = parser.get('DEFAULT', 'OUTPUT_DIR')
+	step = int(parser.get('DEFAULT', 'STEP'))
 
-parser = SafeConfigParser()
-parser.read('config.ini')
-directory  = parser.get('DEFAULT', 'IMG_DIR')
-output = parser.get('DEFAULT', 'OUTPUT_DIR')
-step = int(parser.get('DEFAULT', 'STEP'))
+	images = get_images(directory)
+	images = sorted(images, key = lambda x: x[:-4])
 
-images = get_images(directory)
-images = sorted(images, key = lambda x: x[:-4])
-
-for i in range(0, len(images), step):
-	eventID = len([name for name in os.listdir(output) if os.path.isdir(output + name)]) + 1
-	output_dir = get_output_dir(output)
-	print eventID
-	write_xml(output_dir, 'meta', parser)
-	write_xml(output_dir, 'eml', parser)
-	setup_csv(output_dir, 'images.csv', ['eventID', 'identifier'])
-	setup_csv(output_dir, 'set.csv', ['eventID', 'basisOfRecord', 'recordedBy', 'eventDate', 'eventTime', 'locationID', 'scientificName', 'identifiedBy', 'dateIdentified'])
-	create_archive(directory, output_dir, images[i])
-	img_to_write = []
-	for j in range(i, i+step):
-		print images[j]
-		img_to_write.append(images[j])
-	print '------'
-	write_image_csv(eventID, img_to_write, output_dir)
+	for i in range(0, len(images), step):
+		eventID = len([name for name in os.listdir(output) if os.path.isdir(output + name)]) + 1
+		output_dir = get_output_dir(output)
+		print eventID
+		write_xml(output_dir, 'meta', parser)
+		write_xml(output_dir, 'eml', parser)
+		setup_csv(output_dir, 'images.csv', ['eventID', 'identifier'])
+		setup_csv(output_dir, 'set.csv', ['eventID', 'basisOfRecord', 'recordedBy', 'eventDate', 'eventTime', 'locationID', 'scientificName', 'identifiedBy', 'dateIdentified'])
+		create_archive(directory, output_dir, images[i])
+		img_to_write = []
+		for j in range(i, i+step):
+			print images[j]
+			img_to_write.append(images[j])
+		print '------'
+		write_image_csv(eventID, img_to_write, output_dir)
 
