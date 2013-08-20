@@ -1,5 +1,5 @@
 *.py[cod]
-
+darwin_core_creator/config.ini
 # C extensions
 *.so
 

@@ -16,7 +16,7 @@ def datetime_from_string(datestring):
 	time = datetime.strptime(datestring, "%Y:%m:%d %H:%M:%S")
 	return time
 
-def create_archive(directory, output_dir, img):
+def create_archiveEXIF(directory, output_dir, img):
 	with exiftool.ExifTool() as et:
 	    metadata = et.get_metadata(img)
 	    date =  metadata['MakerNotes:DateTimeOriginal'].split(" ")[0]
@@ -28,7 +28,13 @@ def create_archive(directory, output_dir, img):
 	setwriter.writerow([eventID, 'MovingImage', recBy, date, time, '', '', '', ''])
 	return eventID
 
-def write_image_csv(id, paths, output_dir):
+def create_archive(output_dir, eventID, basis, recBy, evDate, evTime, loc, species, idBy, idDate):
+	setfile = open(output_dir + 'set.csv', 'ab')
+	setwriter = csv.writer(setfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+	setwriter.writerow([eventID, basis, recBy, date, time, loc, species, idBy, idDate])
+	return eventID
+
+def write_image_csv(eventID, paths, output_dir):
 	image_csv = open(output_dir + 'images.csv', 'ab')
 	imgwriter = csv.writer(image_csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 	for path in paths:
@@ -64,7 +70,7 @@ def __main__():
 		write_xml(output_dir, 'eml', parser)
 		setup_csv(output_dir, 'images.csv', ['eventID', 'identifier'])
 		setup_csv(output_dir, 'set.csv', ['eventID', 'basisOfRecord', 'recordedBy', 'eventDate', 'eventTime', 'locationID', 'scientificName', 'identifiedBy', 'dateIdentified'])
-		create_archive(directory, output_dir, images[i])
+		create_archiveEXIF(directory, output_dir, images[i])
 		img_to_write = []
 		for j in range(i, i+step):
 			print images[j]
