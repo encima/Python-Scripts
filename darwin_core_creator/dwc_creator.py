@@ -24,14 +24,15 @@ def create_archiveEXIF(directory, output_dir, img):
 	    path =  metadata['SourceFile']
 	    recBy =  metadata['MakerNotes:SerialNumber']
 	setfile = open(output_dir + 'set.csv', 'ab')
-	setwriter = csv.writer(setfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+	setwriter = csv.writer(setfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 	setwriter.writerow([eventID, 'MovingImage', recBy, date, time, '', '', '', ''])
 	return eventID
 
 def create_archive(output_dir, eventID, basis, recBy, evDate, evTime, loc, species, idBy, idDate):
 	setfile = open(output_dir + 'set.csv', 'ab')
-	setwriter = csv.writer(setfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-	setwriter.writerow([eventID, basis, recBy, date, time, loc, species, idBy, idDate])
+	setwriter = csv.writer(setfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+	print date
+	setwriter.writerow([eventID, basis, recBy, evDate, evTime, loc, species, idBy, idDate])
 	return eventID
 
 def write_image_csv(eventID, paths, output_dir):
